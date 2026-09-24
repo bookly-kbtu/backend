@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/bookly-kbtu/backend/internal/domain"
 	"github.com/bookly-kbtu/backend/internal/infrastructure/otp"
 	"github.com/bookly-kbtu/backend/internal/infrastructure/postgres"
 	authrepo "github.com/bookly-kbtu/backend/internal/infrastructure/postgres/auth"
@@ -13,9 +14,8 @@ import (
 	importerrepo "github.com/bookly-kbtu/backend/internal/infrastructure/postgres/importer"
 	userrepo "github.com/bookly-kbtu/backend/internal/infrastructure/postgres/user"
 	redisstorage "github.com/bookly-kbtu/backend/internal/infrastructure/redis"
-	"github.com/bookly-kbtu/backend/internal/infrastructure/storage"
 	"github.com/bookly-kbtu/backend/internal/infrastructure/sources/zapis"
-	"github.com/bookly-kbtu/backend/internal/domain"
+	"github.com/bookly-kbtu/backend/internal/infrastructure/storage"
 	"github.com/bookly-kbtu/backend/internal/pkg/token"
 	authuc "github.com/bookly-kbtu/backend/internal/usecase/auth"
 	cataloguc "github.com/bookly-kbtu/backend/internal/usecase/catalog"

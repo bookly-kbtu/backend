@@ -24,9 +24,9 @@ func NewApp(cfg Config, deps *Deps) *App {
 		cfg:  cfg,
 		deps: deps,
 		fiber: fiber.New(fiber.Config{
-			AppName:      cfg.AppName,
+			AppName: cfg.AppName,
 			// Room for one image upload plus multipart overhead.
-			BodyLimit: domain.MaxImageBytes + 1<<20,
+			BodyLimit:    domain.MaxImageBytes + 1<<20,
 			ErrorHandler: response.ErrorHandler(deps.Logger),
 		}),
 	}
