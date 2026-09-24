@@ -5,10 +5,11 @@ import "slices"
 type NotificationType string
 
 const (
-	NotificationBookingCreated   NotificationType = "booking_created"
-	NotificationBookingConfirmed NotificationType = "booking_confirmed"
-	NotificationBookingCancelled NotificationType = "booking_cancelled"
-	NotificationBookingReminder  NotificationType = "booking_reminder"
+	NotificationChannelInApp     NotificationChannel = "in_app"
+	NotificationBookingCreated   NotificationType    = "booking_created"
+	NotificationBookingConfirmed NotificationType    = "booking_confirmed"
+	NotificationBookingCancelled NotificationType    = "booking_cancelled"
+	NotificationBookingReminder  NotificationType    = "booking_reminder"
 )
 
 var notificationTypes = []NotificationType{
@@ -33,6 +34,7 @@ const (
 )
 
 var notificationChannels = []NotificationChannel{
+	NotificationChannelInApp,
 	NotificationChannelPush, NotificationChannelSMS, NotificationChannelWhatsApp,
 	NotificationChannelTelegram, NotificationChannelEmail,
 }

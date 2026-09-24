@@ -10,11 +10,15 @@ import (
 	"github.com/bookly-kbtu/backend/internal/infrastructure/postgres"
 	authrepo "github.com/bookly-kbtu/backend/internal/infrastructure/postgres/auth"
 	catalogrepo "github.com/bookly-kbtu/backend/internal/infrastructure/postgres/catalog"
+	importerrepo "github.com/bookly-kbtu/backend/internal/infrastructure/postgres/importer"
 	userrepo "github.com/bookly-kbtu/backend/internal/infrastructure/postgres/user"
 	redisstorage "github.com/bookly-kbtu/backend/internal/infrastructure/redis"
+	"github.com/bookly-kbtu/backend/internal/infrastructure/sources/zapis"
 	"github.com/bookly-kbtu/backend/internal/pkg/token"
 	authuc "github.com/bookly-kbtu/backend/internal/usecase/auth"
 	cataloguc "github.com/bookly-kbtu/backend/internal/usecase/catalog"
+	importeruc "github.com/bookly-kbtu/backend/internal/usecase/importer"
+	platformuc "github.com/bookly-kbtu/backend/internal/usecase/platform"
 )
 
 type Deps struct {
@@ -22,8 +26,10 @@ type Deps struct {
 	DB     *postgres.DB
 	Redis  *redisstorage.Client
 
-	AuthUseCase    *authuc.Service
-	CatalogUseCase *cataloguc.Service
+	AuthUseCase     *authuc.Service
+	CatalogUseCase  *cataloguc.Service
+	PlatformUseCase *platformuc.Service
+	ImporterUseCase *importeruc.Service
 }
 
 func NewDeps(ctx context.Context, cfg Config) (*Deps, error) {
@@ -67,14 +73,24 @@ func NewDeps(ctx context.Context, cfg Config) (*Deps, error) {
 		Tokens:     token.NewManager(cfg.Auth.JWTSecret, cfg.Auth.AccessTokenTTL),
 	})
 	catalogUseCase := cataloguc.New(catalogrepo.NewRepository(db))
+	platformUseCase := platformuc.New(db)
+	zapisSource, err := zapis.New(zapis.Config{BaseURL: cfg.Import.ZapisBaseURL, AssetBaseURL: cfg.Import.ZapisAssetBaseURL, UserAgent: cfg.Import.UserAgent, Delay: cfg.Import.RequestDelay})
+	if err != nil {
+		_ = redis.Close()
+		_ = db.Close()
+		return nil, fmt.Errorf("init zapis source: %w", err)
+	}
+	importerUseCase := importeruc.New(logger, db, importerrepo.NewRepository(db), zapisSource)
 
 	return &Deps{
 		Logger: logger,
 		DB:     db,
 		Redis:  redis,
 
-		AuthUseCase:    authUseCase,
-		CatalogUseCase: catalogUseCase,
+		AuthUseCase:     authUseCase,
+		CatalogUseCase:  catalogUseCase,
+		PlatformUseCase: platformUseCase,
+		ImporterUseCase: importerUseCase,
 	}, nil
 }
 
