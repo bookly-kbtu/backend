@@ -120,6 +120,14 @@ func (h *Handler) Register(api fiber.Router) {
 	api.Get("/firms/:id/masters", h.listFirmMasters)
 }
 
+// listCities godoc
+//
+//	@Summary	List imported market cities
+//	@Tags		market
+//	@Produce	json
+//	@Success	200	{array}		CityResponse
+//	@Failure	500	{object}	response.ErrorBody
+//	@Router		/market/cities [get]
 func (h *Handler) listCities(c *fiber.Ctx) error {
 	cities, err := h.uc.ListCities(c.UserContext())
 	if err != nil {
@@ -133,6 +141,18 @@ func (h *Handler) listCities(c *fiber.Ctx) error {
 	return response.OK(c, out)
 }
 
+// listCategories godoc
+//
+//	@Summary	List imported market categories
+//	@Tags		market
+//	@Produce	json
+//	@Param		kind	query		string	false	"category kind"	Enums(category, subcategory)
+//	@Param		q		query		string	false	"case-insensitive name search"
+//	@Param		limit	query		int		false	"max rows, default 20, max 100"
+//	@Success	200		{array}		CategoryResponse
+//	@Failure	400		{object}	response.ErrorBody
+//	@Failure	500		{object}	response.ErrorBody
+//	@Router		/market/categories [get]
 func (h *Handler) listCategories(c *fiber.Ctx) error {
 	limit, err := queryInt(c, "limit")
 	if err != nil {
@@ -151,6 +171,24 @@ func (h *Handler) listCategories(c *fiber.Ctx) error {
 	return response.OK(c, out)
 }
 
+// listFirms godoc
+//
+//	@Summary		List imported market firms
+//	@Description	Returns read-only imported firms from external catalogues such as zapis.kz. These rows are market data, not Bookly booking entities.
+//	@Tags			market
+//	@Produce		json
+//	@Param			city_id		query		string	false	"source city UUID"
+//	@Param			category_id	query		string	false	"source category UUID"
+//	@Param			q			query		string	false	"case-insensitive search by name, address or description"
+//	@Param			lat			query		number	false	"latitude for distance filtering/sorting"
+//	@Param			lng			query		number	false	"longitude for distance filtering/sorting"
+//	@Param			radius_m	query		int		false	"radius in meters, requires lat and lng"
+//	@Param			limit		query		int		false	"max rows, default 20, max 100"
+//	@Param			offset		query		int		false	"pagination offset"
+//	@Success		200			{array}		FirmResponse
+//	@Failure		400			{object}	response.ErrorBody
+//	@Failure		500			{object}	response.ErrorBody
+//	@Router			/market/firms [get]
 func (h *Handler) listFirms(c *fiber.Ctx) error {
 	filter, err := firmFilter(c)
 	if err != nil {
@@ -169,6 +207,19 @@ func (h *Handler) listFirms(c *fiber.Ctx) error {
 	return response.OK(c, out)
 }
 
+// getFirm godoc
+//
+//	@Summary	Get imported market firm
+//	@Tags		market
+//	@Produce	json
+//	@Param		id	path		string	true	"firm UUID"
+//	@Param		lat	query		number	false	"latitude for distance"
+//	@Param		lng	query		number	false	"longitude for distance"
+//	@Success	200	{object}	FirmDetailResponse
+//	@Failure	400	{object}	response.ErrorBody
+//	@Failure	404	{object}	response.ErrorBody
+//	@Failure	500	{object}	response.ErrorBody
+//	@Router		/market/firms/{id} [get]
 func (h *Handler) getFirm(c *fiber.Ctx) error {
 	id, err := paramUUID(c, "id")
 	if err != nil {
@@ -186,6 +237,16 @@ func (h *Handler) getFirm(c *fiber.Ctx) error {
 	return response.OK(c, firmDetailResponse(*firm))
 }
 
+// listFirmPhotos godoc
+//
+//	@Summary	List imported firm photos
+//	@Tags		market
+//	@Produce	json
+//	@Param		id	path		string	true	"firm UUID"
+//	@Success	200	{array}		FirmPhotoResponse
+//	@Failure	400	{object}	response.ErrorBody
+//	@Failure	500	{object}	response.ErrorBody
+//	@Router		/market/firms/{id}/photos [get]
 func (h *Handler) listFirmPhotos(c *fiber.Ctx) error {
 	id, err := paramUUID(c, "id")
 	if err != nil {
@@ -204,6 +265,16 @@ func (h *Handler) listFirmPhotos(c *fiber.Ctx) error {
 	return response.OK(c, out)
 }
 
+// listFirmServices godoc
+//
+//	@Summary	List imported firm services
+//	@Tags		market
+//	@Produce	json
+//	@Param		id	path		string	true	"firm UUID"
+//	@Success	200	{array}		ServiceResponse
+//	@Failure	400	{object}	response.ErrorBody
+//	@Failure	500	{object}	response.ErrorBody
+//	@Router		/market/firms/{id}/services [get]
 func (h *Handler) listFirmServices(c *fiber.Ctx) error {
 	id, err := paramUUID(c, "id")
 	if err != nil {
@@ -222,6 +293,16 @@ func (h *Handler) listFirmServices(c *fiber.Ctx) error {
 	return response.OK(c, out)
 }
 
+// listFirmMasters godoc
+//
+//	@Summary	List imported firm masters
+//	@Tags		market
+//	@Produce	json
+//	@Param		id	path		string	true	"firm UUID"
+//	@Success	200	{array}		MasterResponse
+//	@Failure	400	{object}	response.ErrorBody
+//	@Failure	500	{object}	response.ErrorBody
+//	@Router		/market/firms/{id}/masters [get]
 func (h *Handler) listFirmMasters(c *fiber.Ctx) error {
 	id, err := paramUUID(c, "id")
 	if err != nil {
