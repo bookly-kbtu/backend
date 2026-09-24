@@ -1,0 +1,27 @@
+name: bookly-backend
+
+# Postgres and Redis live in the infra stack. Start infra first:
+# it creates the "bookly" network that this stack joins.
+services:
+  migrate:
+    build: .
+    image: bookly-backend:latest
+    env_file: .env
+    command: ["migrate", "up"]
+    restart: "no"
+
+  api:
+    build: .
+    image: bookly-backend:latest
+    env_file: .env
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:8080:8080"
+
+networks:
+  default:
+    name: bookly
+    external: true
