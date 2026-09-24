@@ -25,10 +25,10 @@ func New(uc *platformuc.Service, importer *importeruc.Service) *Handler {
 	return &Handler{uc: uc, importer: importer}
 }
 
+// PatchClientProfileRequest does not carry the avatar: it is uploaded via /users/me/avatar.
 type PatchClientProfileRequest struct {
 	FirstName *string `json:"first_name"`
 	LastName  *string `json:"last_name"`
-	AvatarURL *string `json:"avatar_url"`
 }
 
 type ClientProfileResponse struct {
@@ -41,10 +41,10 @@ type ClientProfileResponse struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+// UpsertMasterProfileRequest does not carry the avatar: it is uploaded via /masters/me/avatar.
 type UpsertMasterProfileRequest struct {
 	DisplayName string  `json:"display_name"`
 	Description *string `json:"description"`
-	AvatarURL   *string `json:"avatar_url"`
 }
 
 type MasterProfileResponse struct {
@@ -227,6 +227,9 @@ func (h *Handler) Register(api fiber.Router, requireAuth fiber.Handler, requireA
 	api.Get("/categories", h.listCategories)
 	api.Get("/users/me/profile", requireAuth, h.getClientProfile)
 	api.Patch("/users/me/profile", requireAuth, h.patchClientProfile)
+
+	// Before /masters/me: the group middleware would otherwise also match these routes.
+	h.registerMedia(api, requireAuth)
 
 	masters := api.Group("/masters/me", requireAuth)
 	masters.Post("/profile", h.upsertMasterProfile)

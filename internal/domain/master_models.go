@@ -32,7 +32,6 @@ type MasterProfile struct {
 type UpsertMasterProfileInput struct {
 	DisplayName string
 	Description *string
-	AvatarURL   *string
 }
 
 type MasterLocation struct {

@@ -24,14 +24,13 @@ func (s *Service) GetClientProfile(ctx context.Context, userID uuid.UUID) (*doma
 
 func (s *Service) PatchClientProfile(ctx context.Context, userID uuid.UUID, in domain.PatchClientProfileInput) (*domain.ClientProfile, error) {
 	const query = `
-		INSERT INTO client_profiles (user_id, first_name, last_name, avatar_url)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO client_profiles (user_id, first_name, last_name)
+		VALUES ($1, $2, $3)
 		ON CONFLICT (user_id) DO UPDATE SET
 			first_name = COALESCE($2, client_profiles.first_name),
-			last_name = COALESCE($3, client_profiles.last_name),
-			avatar_url = COALESCE($4, client_profiles.avatar_url)`
+			last_name = COALESCE($3, client_profiles.last_name)`
 
-	if err := postgres.Exec(ctx, s.db.Q(ctx), query, userID, in.FirstName, in.LastName, in.AvatarURL); err != nil {
+	if err := postgres.Exec(ctx, s.db.Q(ctx), query, userID, in.FirstName, in.LastName); err != nil {
 		return nil, err
 	}
 	return s.GetClientProfile(ctx, userID)

@@ -13,7 +13,9 @@ import (
 	importerrepo "github.com/bookly-kbtu/backend/internal/infrastructure/postgres/importer"
 	userrepo "github.com/bookly-kbtu/backend/internal/infrastructure/postgres/user"
 	redisstorage "github.com/bookly-kbtu/backend/internal/infrastructure/redis"
+	"github.com/bookly-kbtu/backend/internal/infrastructure/storage"
 	"github.com/bookly-kbtu/backend/internal/infrastructure/sources/zapis"
+	"github.com/bookly-kbtu/backend/internal/domain"
 	"github.com/bookly-kbtu/backend/internal/pkg/token"
 	authuc "github.com/bookly-kbtu/backend/internal/usecase/auth"
 	cataloguc "github.com/bookly-kbtu/backend/internal/usecase/catalog"
@@ -73,7 +75,26 @@ func NewDeps(ctx context.Context, cfg Config) (*Deps, error) {
 		Tokens:     token.NewManager(cfg.Auth.JWTSecret, cfg.Auth.AccessTokenTTL),
 	})
 	catalogUseCase := cataloguc.New(catalogrepo.NewRepository(db))
-	platformUseCase := platformuc.New(db)
+	var media domain.MediaStorage
+	if cfg.Media.S3Endpoint != "" {
+		s3, err := storage.NewS3(ctx, storage.Config{
+			Endpoint:        cfg.Media.S3Endpoint,
+			Region:          cfg.Media.S3Region,
+			AccessKeyID:     cfg.Media.S3AccessKeyID,
+			SecretAccessKey: cfg.Media.S3SecretAccessKey,
+			Bucket:          cfg.Media.S3Bucket,
+			UseSSL:          cfg.Media.S3UseSSL,
+		})
+		if err != nil {
+			_ = redis.Close()
+			_ = db.Close()
+			return nil, fmt.Errorf("init media storage: %w", err)
+		}
+		media = s3
+	} else {
+		logger.Warn("S3_ENDPOINT is empty: media uploads are disabled")
+	}
+	platformUseCase := platformuc.New(db, media, cfg.Media.PublicBaseURL)
 	zapisSource, err := zapis.New(zapis.Config{BaseURL: cfg.Import.ZapisBaseURL, AssetBaseURL: cfg.Import.ZapisAssetBaseURL, UserAgent: cfg.Import.UserAgent, Delay: cfg.Import.RequestDelay})
 	if err != nil {
 		_ = redis.Close()

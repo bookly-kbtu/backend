@@ -19,5 +19,4 @@ type ClientProfile struct {
 type PatchClientProfileInput struct {
 	FirstName *string
 	LastName  *string
-	AvatarURL *string
 }

@@ -46,6 +46,8 @@ func ErrorHandler(logger *slog.Logger) fiber.ErrorHandler {
 			return Error(c, fiber.StatusConflict, err.Error())
 		case errors.Is(err, domain.ErrTooManyRequests):
 			return Error(c, fiber.StatusTooManyRequests, err.Error())
+		case errors.Is(err, domain.ErrUnavailable):
+			return Error(c, fiber.StatusServiceUnavailable, err.Error())
 		}
 
 		logger.Error("unhandled error", "error", err, "path", c.Path())

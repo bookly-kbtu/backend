@@ -36,6 +36,20 @@ type Config struct {
 	Auth   AuthConfig
 	Docs   DocsConfig
 	Import ImportConfig
+	Media  MediaConfig
+}
+
+// MediaConfig points at S3-compatible storage for uploads. Empty S3Endpoint
+// disables uploads: the API answers 503 on upload endpoints.
+type MediaConfig struct {
+	S3Endpoint        string
+	S3Region          string
+	S3AccessKeyID     string
+	S3SecretAccessKey string
+	S3Bucket          string
+	S3UseSSL          bool
+	// PublicBaseURL prefixes stored media URLs; the API serves them at /api/v1/media.
+	PublicBaseURL string
 }
 
 // ImportConfig is used by cmd/command to pull external catalogues.
@@ -140,6 +154,16 @@ func loadConfig() (Config, error) {
 		ZapisAssetBaseURL: p.str("ZAPIS_ASSET_BASE_URL", "https://zapis.kz"),
 		UserAgent:         p.str("IMPORT_USER_AGENT", "BooklyImporter/0.1"),
 		RequestDelay:      p.duration("IMPORT_REQUEST_DELAY", 500*time.Millisecond),
+	}
+
+	cfg.Media = MediaConfig{
+		S3Endpoint:        p.str("S3_ENDPOINT", ""),
+		S3Region:          p.str("S3_REGION", "garage"),
+		S3AccessKeyID:     p.str("S3_ACCESS_KEY_ID", ""),
+		S3SecretAccessKey: p.str("S3_SECRET_ACCESS_KEY", ""),
+		S3Bucket:          p.str("S3_BUCKET", "bookly-media"),
+		S3UseSSL:          p.bool("S3_USE_SSL", false),
+		PublicBaseURL:     strings.TrimRight(p.str("MEDIA_PUBLIC_BASE_URL", "/api/v1/media"), "/"),
 	}
 
 	if p.err != nil {

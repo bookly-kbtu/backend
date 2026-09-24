@@ -16,13 +16,12 @@ func (s *Service) UpsertMasterProfile(ctx context.Context, userID uuid.UUID, in 
 
 	err = s.db.WithinTx(ctx, func(ctx context.Context) error {
 		const upsert = `
-			INSERT INTO master_profiles (user_id, display_name, description, avatar_url, is_active)
-			VALUES ($1, $2, $3, $4, true)
+			INSERT INTO master_profiles (user_id, display_name, description, is_active)
+			VALUES ($1, $2, $3, true)
 			ON CONFLICT (user_id) DO UPDATE SET
 				display_name = EXCLUDED.display_name,
-				description = EXCLUDED.description,
-				avatar_url = EXCLUDED.avatar_url`
-		if err := postgres.Exec(ctx, s.db.Q(ctx), upsert, userID, displayName, in.Description, in.AvatarURL); err != nil {
+				description = EXCLUDED.description`
+		if err := postgres.Exec(ctx, s.db.Q(ctx), upsert, userID, displayName, in.Description); err != nil {
 			return err
 		}
 		const role = `INSERT INTO user_roles (user_id, role_code) VALUES ($1, 'master') ON CONFLICT DO NOTHING`

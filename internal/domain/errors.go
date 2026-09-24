@@ -9,4 +9,5 @@ var (
 	ErrForbidden       = errors.New("forbidden")
 	ErrConflict        = errors.New("conflict")
 	ErrTooManyRequests = errors.New("too many requests")
+	ErrUnavailable     = errors.New("service unavailable")
 )

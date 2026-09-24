@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
+	"github.com/bookly-kbtu/backend/internal/domain"
 	"github.com/bookly-kbtu/backend/internal/transport/rest/docs"
 	"github.com/bookly-kbtu/backend/internal/transport/rest/v1/middleware"
 	"github.com/bookly-kbtu/backend/internal/transport/rest/v1/response"
@@ -24,6 +25,8 @@ func NewApp(cfg Config, deps *Deps) *App {
 		deps: deps,
 		fiber: fiber.New(fiber.Config{
 			AppName:      cfg.AppName,
+			// Room for one image upload plus multipart overhead.
+			BodyLimit: domain.MaxImageBytes + 1<<20,
 			ErrorHandler: response.ErrorHandler(deps.Logger),
 		}),
 	}
