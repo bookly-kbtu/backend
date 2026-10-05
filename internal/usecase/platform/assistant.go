@@ -65,7 +65,7 @@ func (s *Service) AssistantCandidates(ctx context.Context, userID, id uuid.UUID,
  WHERE ms.is_active AND m.is_active AND c.is_active AND u.status='active' AND m.user_id<>$4
  AND ($1='' OR ms.name ILIKE '%'||$1||'%' OR c.name ILIKE '%'||$1||'%' OR m.display_name ILIKE '%'||$1||'%')
  AND ($2::uuid IS NULL OR ms.category_id=$2) AND ($3::bigint IS NULL OR (ms.currency='KZT' AND ms.price_amount<=$3))
- ORDER BY ms.price_amount,ms.id LIMIT $5 OFFSET $6`, strings.TrimSpace(intent.Query), intent.CategoryID, intent.MaxPrice, userID, limit, offset)
+ ORDER BY (ms.name ILIKE '%'||$1||'%') DESC,(ms.duration_minutes >= 30) DESC,ms.price_amount,ms.id LIMIT $5 OFFSET $6`, strings.TrimSpace(intent.Query), intent.CategoryID, intent.MaxPrice, userID, limit, offset)
 	if err != nil {
 		return nil, err
 	}
